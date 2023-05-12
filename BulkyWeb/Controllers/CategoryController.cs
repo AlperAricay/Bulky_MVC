@@ -39,4 +39,47 @@ public class CategoryController : Controller
         }
         return View();
     }
+    
+    public IActionResult Edit(int? id)
+    {
+        if (id is null or 0) return NotFound();
+        
+        var categoryFromDb = _db.Categories.Find(id);
+        if (categoryFromDb == null) return NotFound();
+        
+        return View(categoryFromDb);
+    }
+
+    [HttpPost]
+    public IActionResult Edit(Category obj)
+    {
+        if (ModelState.IsValid)
+        {
+            _db.Categories.Update(obj);
+            _db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+        return View();
+    }
+    
+    public IActionResult Delete(int? id)
+    {
+        if (id is null or 0) return NotFound();
+        
+        var categoryFromDb = _db.Categories.Find(id);
+        if (categoryFromDb == null) return NotFound();
+        
+        return View(categoryFromDb);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public IActionResult DeletePost(int? id)
+    {
+        var obj = _db.Categories.Find(id);
+        if (obj == null) return NotFound();
+
+        _db.Categories.Remove(obj);
+        _db.SaveChanges();
+        return RedirectToAction("Index");
+    }
 }
