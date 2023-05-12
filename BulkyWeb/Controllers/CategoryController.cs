@@ -27,6 +27,10 @@ public class CategoryController : Controller
     [HttpPost]
     public IActionResult Create(Category obj)
     {
+        if (_db.Categories.Any(category => category.DisplayOrder == obj.DisplayOrder))
+        {
+            ModelState.AddModelError("displayOrder", "The Display Order must be unique.");
+        }
         if (ModelState.IsValid)
         {
             _db.Categories.Add(obj);
