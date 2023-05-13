@@ -1,21 +1,21 @@
-﻿using Bulky.DataAccess.Data;
+﻿using Bulky.DataAccess.Repository.IRepository;
 using Bulky.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BulkyWeb.Controllers;
-
+namespace BulkyWeb.Areas.Admin.Controllers;
+[Area("Admin")]
 public class CategoryController : Controller
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CategoryController(ApplicationDbContext db)
+    public CategoryController(IUnitOfWork unitOfWork)
     {
-        _db = db;
+        _unitOfWork = unitOfWork;
     }
 
     public IActionResult Index()
     {
-        var objCategoryList = _db.Categories.ToList();
+        var objCategoryList = _unitOfWork.CategoryRepo.GetAll().ToList();
         return View(objCategoryList);
     }
 
@@ -27,61 +27,70 @@ public class CategoryController : Controller
     [HttpPost]
     public IActionResult Create(Category obj)
     {
-        if (_db.Categories.Any(category => category.DisplayOrder == obj.DisplayOrder))
+        if (_unitOfWork.CategoryRepo.Get(category => category.DisplayOrder == obj.DisplayOrder) != null)
         {
             ModelState.AddModelError("displayOrder", "The Display Order must be unique.");
         }
+
         if (ModelState.IsValid)
         {
-            _db.Categories.Add(obj);
-            _db.SaveChanges();
+            _unitOfWork.CategoryRepo.Add(obj);
+            _unitOfWork.Save();
             TempData["success"] = "Category created successfully.";
             return RedirectToAction("Index");
         }
+
         return View();
     }
-    
+
     public IActionResult Edit(int? id)
     {
         if (id is null or 0) return NotFound();
-        
-        var categoryFromDb = _db.Categories.Find(id);
+
+        var categoryFromDb = _unitOfWork.CategoryRepo.Get(u => u.Id == id);
         if (categoryFromDb == null) return NotFound();
-        
+
         return View(categoryFromDb);
     }
 
     [HttpPost]
     public IActionResult Edit(Category obj)
     {
+        if (_unitOfWork.CategoryRepo.Get(category =>
+                category.DisplayOrder == obj.DisplayOrder && category.Id != obj.Id) != null)
+        {
+            ModelState.AddModelError("displayOrder", "The Display Order must be unique.");
+        }
+
         if (ModelState.IsValid)
         {
-            _db.Categories.Update(obj);
-            _db.SaveChanges();
+            _unitOfWork.CategoryRepo.Update(obj);
+            _unitOfWork.Save();
             TempData["success"] = "Category edited successfully.";
             return RedirectToAction("Index");
         }
+
         return View();
     }
-    
+
     public IActionResult Delete(int? id)
     {
         if (id is null or 0) return NotFound();
-        
-        var categoryFromDb = _db.Categories.Find(id);
+
+        var categoryFromDb = _unitOfWork.CategoryRepo.Get(u => u.Id == id);
         if (categoryFromDb == null) return NotFound();
-        
+
         return View(categoryFromDb);
     }
 
     [HttpPost, ActionName("Delete")]
     public IActionResult DeletePost(int? id)
     {
-        var obj = _db.Categories.Find(id);
+        var obj = _unitOfWork.CategoryRepo.Get(u => u.Id == id);
         if (obj == null) return NotFound();
 
-        _db.Categories.Remove(obj);
-        _db.SaveChanges();
+        _unitOfWork.CategoryRepo.Remove(obj);
+        _unitOfWork.Save();
         TempData["success"] = "Category deleted successfully.";
         return RedirectToAction("Index");
     }
