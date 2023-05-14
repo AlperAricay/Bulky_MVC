@@ -26,10 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <_ContentIncludedByDefault Remove="Areas\Admin\Views\Category\Create.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Admin\Views\Category\Delete.cshtml" />
     <_ContentIncludedByDefault Remove="Areas\Admin\Views\Category\Edit.cshtml" />
