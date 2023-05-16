@@ -9,10 +9,12 @@ namespace BulkyWeb.Areas.Admin.Controllers;
 public class ProductController : Controller
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public ProductController(IUnitOfWork unitOfWork)
+    public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
     {
         _unitOfWork = unitOfWork;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     public IActionResult Index()
@@ -52,7 +54,40 @@ public class ProductController : Controller
     {
         if (ModelState.IsValid)
         {
-            _unitOfWork.ProductRepo.Add(productViewModel.Product);
+            var wwwRootPath = _webHostEnvironment.WebRootPath;
+            if (file != null)
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                var productPath = Path.Combine(wwwRootPath, @"images\product");
+
+                if (!string.IsNullOrEmpty(productViewModel.Product.ImageUrl))
+                {
+                    //delete the old image
+                    var oldImagePath = Path.Combine(wwwRootPath, productViewModel.Product.ImageUrl.TrimStart('\\'));
+
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
+
+                using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                {
+                    file.CopyTo(fileStream);
+                }
+
+                productViewModel.Product.ImageUrl = @"\images\product\" + fileName;
+            }
+
+            if (productViewModel.Product.Id == 0)
+            {
+                _unitOfWork.ProductRepo.Add(productViewModel.Product);
+            }
+            else
+            {
+                _unitOfWork.ProductRepo.Update(productViewModel.Product);
+            }
+
             _unitOfWork.Save();
             TempData["success"] = "Product created successfully.";
             return RedirectToAction("Index");
