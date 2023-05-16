@@ -14,13 +14,13 @@
         </div>
     </div>
 
-    <table class="table table-hover">
+    <table id="tblData" class="table table-hover" style="width: 100%">
         <thead>
         <tr class="table-dark">
             <th scope="col">
                 Title
             </th>
-            <th>
+            <th scope="col">
                 ISBN
             </th>
             <th scope="col">
@@ -61,3 +61,8 @@
         </tbody>
     </table>
 </div>
+
+@section Scripts
+{
+    <script src="~/js/product.js"></script>
+}
