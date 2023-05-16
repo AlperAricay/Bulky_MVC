@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BulkyWeb.Areas.Admin.Controllers;
+
 [Area("Admin")]
 public class ProductController : Controller
 {
@@ -19,7 +20,7 @@ public class ProductController : Controller
 
     public IActionResult Index()
     {
-        var objProductList = _unitOfWork.ProductRepo.GetAll(includeProperties:"Category").ToList();
+        var objProductList = _unitOfWork.ProductRepo.GetAll(includeProperties: "Category").ToList();
         return View(objProductList);
     }
 
@@ -43,10 +44,9 @@ public class ProductController : Controller
         else
         {
             //update
-            productViewModel.Product = _unitOfWork.ProductRepo.Get(u=> u.Id == id);
+            productViewModel.Product = _unitOfWork.ProductRepo.Get(u => u.Id == id);
             return View(productViewModel);
         }
-        
     }
 
     [HttpPost]
@@ -92,7 +92,7 @@ public class ProductController : Controller
             TempData["success"] = "Product created successfully.";
             return RedirectToAction("Index");
         }
-        
+
         var categoryList = _unitOfWork.CategoryRepo.GetAll().Select(u => new SelectListItem
         {
             Text = u.Name,
@@ -105,22 +105,33 @@ public class ProductController : Controller
     public IActionResult Delete(int? id)
     {
         if (id is null or 0) return NotFound();
-        
+
         var productFromDb = _unitOfWork.ProductRepo.Get(u => u.Id == id);
         if (productFromDb == null) return NotFound();
 
         return View(productFromDb);
     }
-    
+
     [HttpPost, ActionName("Delete")]
     public IActionResult DeletePost(int? id)
     {
         var obj = _unitOfWork.ProductRepo.Get(u => u.Id == id);
         if (obj == null) return NotFound();
-        
+
         _unitOfWork.ProductRepo.Remove(obj);
         _unitOfWork.Save();
         TempData["success"] = "Product deleted successfully.";
         return RedirectToAction("Index");
     }
+
+    #region API CALLS
+
+    [HttpGet]
+    public IActionResult GetAll()
+    {
+        var objProductList = _unitOfWork.ProductRepo.GetAll(includeProperties: "Category").ToList();
+        return Json(new {data = objProductList});
+    }
+
+    #endregion
 }
