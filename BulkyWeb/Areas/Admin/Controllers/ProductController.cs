@@ -21,7 +21,7 @@ public class ProductController : Controller
         return View(objProductList);
     }
 
-    public IActionResult Create()
+    public IActionResult Upsert(int? id)
     {
         var categoryList = _unitOfWork.CategoryRepo.GetAll().Select(u => new SelectListItem
         {
@@ -33,11 +33,22 @@ public class ProductController : Controller
             CategoryList = categoryList,
             Product = new Product()
         };
-        return View(productViewModel);
+        if (id is null or 0)
+        {
+            //create
+            return View(productViewModel);
+        }
+        else
+        {
+            //update
+            productViewModel.Product = _unitOfWork.ProductRepo.Get(u=> u.Id == id);
+            return View(productViewModel);
+        }
+        
     }
 
     [HttpPost]
-    public IActionResult Create(ProductViewModel productViewModel)
+    public IActionResult Upsert(ProductViewModel productViewModel, IFormFile? file)
     {
         if (ModelState.IsValid)
         {
@@ -56,30 +67,6 @@ public class ProductController : Controller
         return View(productViewModel);
     }
 
-    public IActionResult Edit(int? id)
-    {
-        if (id is null or 0) return NotFound();
-        
-        var productFromDb = _unitOfWork.ProductRepo.Get(u => u.Id == id);
-        if (productFromDb == null) return NotFound();
-
-        return View(productFromDb);
-    }
-
-    [HttpPost]
-    public IActionResult Edit(Product obj)
-    {
-        if (ModelState.IsValid)
-        {
-            _unitOfWork.ProductRepo.Update(obj);
-            _unitOfWork.Save();
-            TempData["success"] = "Product edited successfully.";
-            return RedirectToAction("Index");
-        }
-
-        return View();
-    }
-    
     public IActionResult Delete(int? id)
     {
         if (id is null or 0) return NotFound();

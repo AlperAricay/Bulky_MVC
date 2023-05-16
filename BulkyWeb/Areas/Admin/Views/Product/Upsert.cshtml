@@ -1,9 +1,10 @@
 ﻿@model ProductViewModel
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
+    <input asp-for="Product.Id" hidden/>
     <div class="border p-3 mt-4">
         <div class="row pb-2">
-            <h2 class="text-primary">Create Product</h2>
+            <h2 class="text-primary">@(Model.Product.Id != 0 ? "Update" : "Create") Product</h2>
         </div>
         @* <div asp-validation-summary="All" class="text-danger"></div> *@
         <div class="mb-3 row p-1">
@@ -13,8 +14,7 @@
         </div>
         <div class="mb-3 row p-1">
             <label asp-for="Product.Description" class="p-0"></label>
-            <textarea asp-for="Product.Description" class="form-control"></textarea>
-            <span asp-validation-for="Product.Description" class="text-danger"></span>
+            <textarea asp-for="Product.Description" class="form-control text-muted"></textarea>
         </div>
         <div class="mb-3 row p-1">
             <label asp-for="Product.ISBN" class="p-0"></label>
@@ -54,13 +54,19 @@
             <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
         </div>
         <div class="mb-3 row p-1">
-            <label asp-for="Product.ImageUrl" class="p-0"></label>
+            <input type="file" class="p-0"/>
             <input asp-for="Product.ImageUrl" class="form-control"/>
-            <span asp-validation-for="Product.ImageUrl" class="text-danger"></span>
         </div>
         <div class="row">
             <div class="col-6 col-md-3">
-                <button type="submit" class="btn btn-primary form-control">Create</button>
+                @if (Model.Product.Id != 0)
+                {
+                    <button type="submit" class="btn btn-primary form-control">Update</button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary form-control">Create</button>
+                }
             </div>
             <div class="col-6 col-md-3">
                 <a asp-controller="Product" asp-action="Index" class="btn btn-secondary form-control">
@@ -73,6 +79,19 @@
 
 @section Scripts
 {
+    <script>
+        tinymce.init({
+          selector: 'textarea',
+          plugins: 'anchor autolink charmap codesample emoticons lists table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss',
+          toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent',
+          tinycomments_mode: 'embedded',
+          tinycomments_author: 'Author name',
+          mergetags_list: [
+            { value: 'First.Name', title: 'First Name' },
+            { value: 'Email', title: 'Email' },
+          ]
+        });
+      </script>
     @{
         <partial name="_ValidationScriptsPartial"/>
     }
