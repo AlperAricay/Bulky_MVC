@@ -19,7 +19,7 @@ public class ProductController : Controller
 
     public IActionResult Index()
     {
-        var objProductList = _unitOfWork.ProductRepo.GetAll().ToList();
+        var objProductList = _unitOfWork.ProductRepo.GetAll(includeProperties:"Category").ToList();
         return View(objProductList);
     }
 
