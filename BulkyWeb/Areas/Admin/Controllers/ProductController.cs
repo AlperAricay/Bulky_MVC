@@ -24,7 +24,7 @@ public class ProductController : Controller
         return View(objProductList);
     }
 
-    public IActionResult Upsert(int? id)
+    public IActionResult Upsert(int? productId)
     {
         var categoryList = _unitOfWork.CategoryRepo.GetAll().Select(u => new SelectListItem
         {
@@ -36,7 +36,7 @@ public class ProductController : Controller
             CategoryList = categoryList,
             Product = new Product()
         };
-        if (id is null or 0)
+        if (productId is null or 0)
         {
             //create
             return View(productViewModel);
@@ -44,7 +44,7 @@ public class ProductController : Controller
         else
         {
             //update
-            productViewModel.Product = _unitOfWork.ProductRepo.Get(u => u.Id == id);
+            productViewModel.Product = _unitOfWork.ProductRepo.Get(u => u.Id == productId);
             return View(productViewModel);
         }
     }
@@ -112,9 +112,9 @@ public class ProductController : Controller
     }
     
     [HttpDelete]
-    public IActionResult Delete(int? id)
+    public IActionResult Delete(int? productId)
     {
-        var productToDelete = _unitOfWork.ProductRepo.Get(u=> u.Id == id);
+        var productToDelete = _unitOfWork.ProductRepo.Get(u=> u.Id == productId);
         if (productToDelete == null)
         {
             return Json(new { success = false, message = "Error while deleting" });
