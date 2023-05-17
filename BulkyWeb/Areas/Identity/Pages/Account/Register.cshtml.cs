@@ -101,6 +101,14 @@ namespace BulkyWeb.Areas.Identity.Pages.Account
             public string? Role { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> RoleList { get; set; }
+
+            [Required]
+            public string Name { get; set; }
+            [Display(Name = "Street Address")] public string? StreetAddress { get; set; }
+            public string? City { get; set; }
+            public string? State { get; set; }
+            [Display(Name = "Postal Code")] public string? PostalCode { get; set; }
+            [Display(Name = "Phone Number")] public string? PhoneNumber { get; set; }
         }
 
 
@@ -137,6 +145,12 @@ namespace BulkyWeb.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                user.StreetAddress = Input.StreetAddress;
+                user.City = Input.City;
+                user.Name = Input.Name;
+                user.State = Input.State;
+                user.PostalCode = Input.PostalCode;
+                user.PhoneNumber = Input.PhoneNumber;
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
