@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Security.Claims;
 using Bulky.DataAccess.Repository.IRepository;
 using Bulky.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BulkyWeb.Areas.Customer.Controllers;
+
 [Area("Customer")]
 public class HomeController : Controller
 {
@@ -21,11 +24,44 @@ public class HomeController : Controller
         var productList = _unitOfWork.ProductRepo.GetAll(includeProperties: "Category");
         return View(productList);
     }
-    
-    public IActionResult Details(int? productId)
+
+    public IActionResult Details(int productId)
     {
-        var product = _unitOfWork.ProductRepo.Get(u=>u.Id == productId, includeProperties: "Category");
-        return View(product);
+        var cart = new ShoppingCart
+        {
+            Product = _unitOfWork.ProductRepo.Get(u => u.Id == productId, includeProperties: "Category"),
+            Count = 1,
+            ProductId = productId
+        };
+        return View(cart);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public IActionResult Details(ShoppingCart shoppingCart)
+    {
+        var claimsIdentity = (ClaimsIdentity) User.Identity;
+        var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+        shoppingCart.ApplicationUserId = userId;
+
+        var cartFromDb = _unitOfWork.ShoppingCartRepo.Get(u =>
+            u.ProductId == shoppingCart.ProductId && u.ApplicationUserId == userId);
+        if (cartFromDb != null)
+        {
+            //Duplicate entry, increase count instead
+            cartFromDb.Count += shoppingCart.Count;
+            _unitOfWork.ShoppingCartRepo.Update(cartFromDb);
+        }
+        else
+        {
+            //New entry
+            _unitOfWork.ShoppingCartRepo.Add(shoppingCart);
+        }
+
+        TempData["success"] = "Cart updated successfully";
+        _unitOfWork.Save();
+
+        return RedirectToAction(nameof(Index));
     }
 
     public IActionResult Privacy()
@@ -36,6 +72,6 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
     }
 }

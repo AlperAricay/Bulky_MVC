@@ -30,9 +30,11 @@ public class Repository<T> : IRepository<T> where T : class
         return result;
     }
 
-    public T? Get(Expression<Func<T, bool>> filter, string? includeProperties = null)
+    public T? Get(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false)
     {
-        var result = _dbSet.Where(filter);
+        var result = tracked ? _dbSet : _dbSet.AsNoTracking(); //Prevents from updating automatically
+
+        result = result.Where(filter);
         if (!string.IsNullOrEmpty(includeProperties))
         {
             foreach (var includeProperty in includeProperties
