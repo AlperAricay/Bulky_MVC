@@ -9,6 +9,8 @@ public class UnitOfWork : IUnitOfWork
     public ICategoryRepository CategoryRepo { get; }
     public IProductRepository ProductRepo { get; }
     public ICompanyRepository CompanyRepo { get; }
+    public IShoppingCartRepository ShoppingCartRepo { get; }
+    public IApplicationUserRepository ApplicationUserRepo { get; }
 
     public UnitOfWork(ApplicationDbContext db)
     {
@@ -16,6 +18,8 @@ public class UnitOfWork : IUnitOfWork
         CategoryRepo = new CategoryRepository(_db);
         ProductRepo = new ProductRepository(_db);
         CompanyRepo = new CompanyRepository(_db);
+        ShoppingCartRepo = new ShoppingCartRepository(_db);
+        ApplicationUserRepo = new ApplicationUserRepository(_db);
     }
 
     public void Save()
