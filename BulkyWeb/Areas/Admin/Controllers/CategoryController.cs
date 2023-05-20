@@ -46,11 +46,11 @@ public class CategoryController : Controller
         return View();
     }
 
-    public IActionResult Edit(int? productId)
+    public IActionResult Edit(int? id)
     {
-        if (productId is null or 0) return NotFound();
+        if (id is null or 0) return NotFound();
 
-        var categoryFromDb = _unitOfWork.CategoryRepo.Get(u => u.Id == productId);
+        var categoryFromDb = _unitOfWork.CategoryRepo.Get(u => u.Id == id);
         if (categoryFromDb == null) return NotFound();
 
         return View(categoryFromDb);
@@ -76,20 +76,20 @@ public class CategoryController : Controller
         return View();
     }
 
-    public IActionResult Delete(int? productId)
+    public IActionResult Delete(int? id)
     {
-        if (productId is null or 0) return NotFound();
+        if (id is null or 0) return NotFound();
 
-        var categoryFromDb = _unitOfWork.CategoryRepo.Get(u => u.Id == productId);
+        var categoryFromDb = _unitOfWork.CategoryRepo.Get(u => u.Id == id);
         if (categoryFromDb == null) return NotFound();
 
         return View(categoryFromDb);
     }
 
     [HttpPost, ActionName("Delete")]
-    public IActionResult DeletePost(int? productId)
+    public IActionResult DeletePost(int? id)
     {
-        var obj = _unitOfWork.CategoryRepo.Get(u => u.Id == productId);
+        var obj = _unitOfWork.CategoryRepo.Get(u => u.Id == id);
         if (obj == null) return NotFound();
 
         _unitOfWork.CategoryRepo.Remove(obj);

@@ -27,7 +27,7 @@ public class ProductController : Controller
         return View(objProductList);
     }
 
-    public IActionResult Upsert(int? productId)
+    public IActionResult Upsert(int? id)
     {
         var categoryList = _unitOfWork.CategoryRepo.GetAll().Select(u => new SelectListItem
         {
@@ -39,7 +39,7 @@ public class ProductController : Controller
             CategoryList = categoryList,
             Product = new Product()
         };
-        if (productId is null or 0)
+        if (id is null or 0)
         {
             //create
             return View(productViewModel);
@@ -47,7 +47,7 @@ public class ProductController : Controller
         else
         {
             //update
-            productViewModel.Product = _unitOfWork.ProductRepo.Get(u => u.Id == productId);
+            productViewModel.Product = _unitOfWork.ProductRepo.Get(u => u.Id == id);
             return View(productViewModel);
         }
     }
@@ -85,14 +85,15 @@ public class ProductController : Controller
             if (productViewModel.Product.Id == 0)
             {
                 _unitOfWork.ProductRepo.Add(productViewModel.Product);
+                TempData["success"] = "Product created successfully.";
             }
             else
             {
                 _unitOfWork.ProductRepo.Update(productViewModel.Product);
+                TempData["success"] = "Product edited successfully.";
             }
 
             _unitOfWork.Save();
-            TempData["success"] = "Product created successfully.";
             return RedirectToAction("Index");
         }
 
@@ -115,9 +116,9 @@ public class ProductController : Controller
     }
     
     [HttpDelete]
-    public IActionResult Delete(int? productId)
+    public IActionResult Delete(int? id)
     {
-        var productToDelete = _unitOfWork.ProductRepo.Get(u=> u.Id == productId);
+        var productToDelete = _unitOfWork.ProductRepo.Get(u=> u.Id == id);
         if (productToDelete == null)
         {
             return Json(new { success = false, message = "Error while deleting" });
@@ -131,6 +132,7 @@ public class ProductController : Controller
         
         _unitOfWork.ProductRepo.Remove(productToDelete);
         _unitOfWork.Save();
+        TempData["success"] = "Product deleted successfully.";
         
         return Json(new {success = true, message = "Deleted successfully"});
     }
