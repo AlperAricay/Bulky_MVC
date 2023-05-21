@@ -16,9 +16,11 @@ public class Repository<T> : IRepository<T> where T : class
         _dbSet = _db.Set<T>();
     }
     
-    public IEnumerable<T> GetAll(string? includeProperties = null)
+    public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties = null)
     {
         IQueryable<T> result = _dbSet;
+        if (filter != null) result = result.Where(filter);
+
         if (!string.IsNullOrEmpty(includeProperties))
         {
             foreach (var includeProperty in includeProperties
