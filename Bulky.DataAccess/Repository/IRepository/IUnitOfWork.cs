@@ -7,5 +7,7 @@ public interface IUnitOfWork
     ICompanyRepository CompanyRepo { get; }
     IShoppingCartRepository ShoppingCartRepo { get; }
     IApplicationUserRepository ApplicationUserRepo { get; }
+    IOrderHeaderRepository OrderHeaderRepo { get; }
+    IOrderDetailRepository OrderDetailRepo { get; }
     void Save();
 }
