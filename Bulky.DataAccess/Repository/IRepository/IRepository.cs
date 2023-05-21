@@ -9,5 +9,5 @@ public interface IRepository<T> where T : class
     T? Get(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false);
     void Add(T entity);
     void Remove(T entity);
-    void Remove(IEnumerable<T> entity);
+    void RemoveRange(IEnumerable<T> entity);
 }
