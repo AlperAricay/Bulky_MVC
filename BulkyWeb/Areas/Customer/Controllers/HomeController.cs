@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Bulky.DataAccess.Repository.IRepository;
 using Bulky.Models;
+using Bulky.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,15 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        var claimsIdentity = (ClaimsIdentity) User.Identity;
+        var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (claim != null)
+        {
+            HttpContext.Session.SetInt32(SD.SessionCart, 
+                _unitOfWork.ShoppingCartRepo.GetAll(u => u.ApplicationUserId == claim.Value).Count());
+        }
+        
         var productList = _unitOfWork.ProductRepo.GetAll(includeProperties: "Category");
         return View(productList);
     }
@@ -51,16 +61,18 @@ public class HomeController : Controller
             //Duplicate entry, increase count instead
             cartFromDb.Count += shoppingCart.Count;
             _unitOfWork.ShoppingCartRepo.Update(cartFromDb);
+            _unitOfWork.Save();
         }
         else
         {
             //New entry
             _unitOfWork.ShoppingCartRepo.Add(shoppingCart);
+            _unitOfWork.Save();
+            HttpContext.Session.SetInt32(SD.SessionCart, 
+                _unitOfWork.ShoppingCartRepo.GetAll(u => u.ApplicationUserId == userId).Count());
         }
 
         TempData["success"] = "Cart updated successfully";
-        _unitOfWork.Save();
-
         return RedirectToAction(nameof(Index));
     }
 
