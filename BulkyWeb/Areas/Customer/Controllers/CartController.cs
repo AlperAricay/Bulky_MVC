@@ -187,6 +187,9 @@ public class CartController : Controller
             .GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
         _unitOfWork.ShoppingCartRepo.RemoveRange(shoppingCarts);
         _unitOfWork.Save();
+        
+        HttpContext.Session.Clear();
+        //HttpContext.Session.SetInt32(SD.SessionCart, 0); We clear instead since we know we only have 1 session
 
         return View(id);
     }
